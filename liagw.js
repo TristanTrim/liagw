@@ -3,10 +3,16 @@
 
 document.body.style.backgroundColor = "black";
 
+// this may come in handy later
 //function mouseMove(e){
 //    canvas.setPointerCapture(e.pointerId);
 //    canvas.onpointermove = mouseMove2;
 //}
+//
+
+
+// Mouse motion
+
 var state = "normal";
 var vary = 0;
 var varx = 0;
@@ -37,6 +43,8 @@ function mouseMove(e){
     vary = e.pageY;
 }
 
+// Keyboard stuff
+
 keycodes={
     "KeyS":function(){state="scaling"},
     "KeyF":function(){state="grabbing"}
@@ -47,6 +55,9 @@ function keydown(e){
 function keyup(e){
     state="normal";
 }
+
+
+// cursor behavior
 
 function hlProximalThing(){
     let closest = 0;
@@ -70,20 +81,25 @@ function close(thing1,thing2){
     r2=thing2[2];
     return(Math.abs(x1-x2)**2+Math.abs(y1-y2)**2 < (r1+r2)**2);
 }
+
+
+// canvas hubbub
+
 var w = window.innerWidth;
 var h = window.innerHeight;
 var canvas = document.getElementById('canvas');
 
-// these should be objects with attributes.
-var things = [];
-things.push([canvas.width/2,canvas.height/2,13],false);
-things.push([10,20,4,false]);
-things.push([20,20,4,false]);
-things.push([30,20,4,false]);
-
 fuck_you=20;
 canvas.width=window.innerWidth-fuck_you;
 canvas.height=window.innerHeight-fuck_you;
+
+
+// things
+
+// these should be objects with attributes.
+var things = [];
+things.push([canvas.width/2,canvas.height/2,13],false);//cursor
+things.push([canvas.width/3,canvas.height/3,4],false);//window
 
 if (canvas.getContext)
 {
@@ -100,11 +116,16 @@ function drawCircle(coords){
     ctx.arc(x, y, r, 0, 2 * Math.PI, false);
     ctx.lineWidth = 1;
     if(coords[3]){
-        ctx.strokeStyle = '#DDFFFF';
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#0077aa';
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#00FF00';
+        ctx.stroke();
     }else{
         ctx.strokeStyle = '#00FF00';
+        ctx.stroke();
     }
-    ctx.stroke();
 }
 
 // This should be based on activity, rather than constant, but... yeah.
@@ -120,3 +141,114 @@ function tic(){
 }
 tic();
 
+
+// always keep a list of fruit around
+// (thanks wikipedia)
+list_of_fruit = [
+    "Açaí",
+    "Akee",
+    "Apple",
+    "Apricot",
+    "Avocado",
+    "Banana",
+    "Bilberry",
+    "Blackberry",
+    "Blackcurrant",
+    "Black sapote",
+    "Blueberry",
+    "Boysenberry",
+    "Buddha's hand (fingered citron)",
+    "Crab apples",
+    "Currant",
+    "Cherry",
+    "Cherimoya (Custard Apple)",
+    "Chico fruit",
+    "Cloudberry",
+    "Coconut",
+    "Cranberry",
+    "Cucumber",
+    "Damson",
+    "Date",
+    "Dragonfruit (or Pitaya)",
+    "Durian",
+    "Elderberry",
+    "Feijoa",
+    "Fig",
+    "Goji berry",
+    "Gooseberry",
+    "Grape",
+    "Grapefruit",
+    "Guava",
+    "Honeyberry",
+    "Huckleberry",
+    "Jabuticaba",
+    "Jackfruit",
+    "Jambul",
+    "Japanese plum",
+    "Jostaberry",
+    "Jujube",
+    "Juniper berry",
+    "Kiwano (horned melon)",
+    "Kiwifruit",
+    "Kumquat",
+    "Lemon",
+    "Lime",
+    "Loganberry",
+    "Loquat",
+    "Longan",
+    "Lychee",
+    "Mango",
+    "Mangosteen",
+    "Marionberry",
+    "Melon",
+    "Miracle fruit",
+    "Mulberry",
+    "Nectarine",
+    "Nance",
+    "Orange",
+    "Papaya",
+    "Passionfruit",
+    "Peach",
+    "Pear",
+    "Persimmon",
+    "Plantain",
+    "Plum",
+    "Pineapple",
+    "Pineberry",
+    "Plumcot (or Pluot)",
+    "Pomegranate",
+    "Pomelo",
+    "Purple mangosteen",
+    "Quince",
+    "Raspberry",
+    "Rambutan (or Mamin Chino)",
+    "Redcurrant",
+    "Salal berry",
+    "Salak",
+    "Satsuma",
+    "Soursop",
+    "Star apple",
+    "Star fruit",
+    "Strawberry",
+    "Surinam cherry",
+    "Tamarillo",
+    "Tamarind",
+    "Tayberry",
+    "Ugli fruit",
+    "White currant",
+    "White sapote",
+    "Yuzu",
+    "Avocado",
+    "Bell pepper",
+    "Chile pepper",
+    "Corn kernel",
+    "Cucumber",
+    "Eggplant",
+    "Jalapeño",
+    "Olive",
+    "Pea",
+    "Pumpkin",
+    "Squash",
+    "Tomato",
+    "Zucchini"
+]
