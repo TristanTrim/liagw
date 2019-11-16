@@ -7,12 +7,45 @@ document.body.style.backgroundColor = "black";
 //    canvas.setPointerCapture(e.pointerId);
 //    canvas.onpointermove = mouseMove2;
 //}
-
+var state = "normal";
+var vary = 0;
+var varx = 0;
 function mouseMove(e){
-    x = e.pageX;
-    y = e.pageY;
-    things[0][0]=x;
-    things[0][1]=y;
+    dx = (e.pageX-varx);
+    dy = (e.pageY-vary);
+    if(state=="normal"){
+        //things[0][0]+=dx;
+        //things[0][1]+=dy;
+        things[0][0]=e.pageX;
+        things[0][1]=e.pageY;
+    }else if(state=="scaling"){
+        things[0][2]+=dy;
+        if(things[0][2]<1){
+            things[0][2]=1;
+        }
+    }else if(state=="grabbing"){
+        things[0][0]+=dx;
+        things[0][1]+=dy;
+        for (i=1;i<things.length;i++){
+            if(things[i][3]){
+                things[i][0]+=dx;
+                things[i][1]+=dy;
+            }
+        }
+    }
+    varx = e.pageX;
+    vary = e.pageY;
+}
+
+keycodes={
+    "KeyS":function(){state="scaling"},
+    "KeyF":function(){state="grabbing"}
+}
+function keydown(e){
+    keycodes[e.code]();
+}
+function keyup(e){
+    state="normal";
 }
 
 function hlProximalThing(){
@@ -75,7 +108,9 @@ function drawCircle(coords){
 
 // This should be based on activity, rather than constant, but... yeah.
 function tic(){
-    hlProximalThing();
+    if(state=="normal"){
+        hlProximalThing();
+    }
     clear();
     for(i=0;i<things.length;i++){
         drawCircle(things[i]);
