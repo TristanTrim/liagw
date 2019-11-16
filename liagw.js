@@ -19,7 +19,7 @@ function mouseMove(e){
         things[0][0]=e.pageX;
         things[0][1]=e.pageY;
     }else if(state=="scaling"){
-        things[0][2]+=dy;
+        things[0][2]-=dy;
         if(things[0][2]<1){
             things[0][2]=1;
         }
@@ -74,6 +74,7 @@ var w = window.innerWidth;
 var h = window.innerHeight;
 var canvas = document.getElementById('canvas');
 
+// these should be objects with attributes.
 var things = [];
 things.push([canvas.width/2,canvas.height/2,13],false);
 things.push([10,20,4,false]);
