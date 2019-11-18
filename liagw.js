@@ -48,21 +48,23 @@ function mouseMove(e){
 keycodes={
     "KeyS":function(){state="scaling"},
     "KeyF":function(){state="grabbing"},
-    "KeyD":function(){state="looking";propSplode();},
+    "KeyD":function(){state="looking";propSplode(getClosestThing());},
     "KeyW":function(){state="normal"}
 }
 var splode = {};
-function propSplode(){
+function propSplode(thing){
     //ob = getSingleSelection();
     splode = {};
-    splode.x = 80;///REPLACE
-    splode.y = 80;///REPLACE
+    splode.x = thing[0];
+    splode.y = thing[1];
     splode.rad = 40;
-    splode.list = list_of_fruit;
+    splode.list = window[thing[4]];
+    console.log(thing);
+    console.log(splode.list);
     splode.offset = -Math.PI/3;
     splode.readSpan = 2*Math.PI/3;
     splode.scrollSpan = 2*Math.PI - splode.readSpan;
-    splode.nRead=10;
+    splode.nRead=8;
     splode.readTic= splode.readSpan / splode.nRead;
     splode.scrollTic= splode.scrollSpan / (splode.list.length - splode.nRead);
     splode.draw = function(){
@@ -73,7 +75,15 @@ function propSplode(){
             let y = Math.sin(pos)*splode.rad+splode.y;
             coords=[x,y,r];
             drawCircle(coords);
-            pos += splode.scrollTic;
+            if(pos>splode.offset && pos<-splode.offset){//in the read zone
+                pos += splode.readTic;
+                // print textual information
+            }else{
+                pos += splode.scrollTic;
+            }
+            if(pos>Math.PI){
+                pos-=2*Math.PI;
+            }
         }
     };
 }
@@ -90,27 +100,39 @@ function keyup(e){
 
 // cursor behavior
 
+function getClosestThing(){
+    let closest = 1;
+    let closestDist = getDist(things[0],things[1]);
+    for (i=2;i<things.length;i++){
+        let dist = getDist(things[0],things[i]);
+        if(dist < closestDist){
+            closest = i;
+            closestDist = dist;
+        }
+        return(things[closest]);
+    }
+}
 function hlProximalThing(){
-    let closest = 0;
     for (i=1;i<things.length;i++){
-        //if(closest==0){
             if(close(things[0],things[i])){
                 things[i][3]=true;
             }else{
                 things[i][3]=false;
             }
-        //}
     }
 }
 
 function close(thing1,thing2){
+    return(getDist(thing1,thing2) < (r1+r2)**2);
+}
+function getDist(thing1,thing2){
     x1=thing1[0];
     y1=thing1[1];
     x2=thing2[0];
     y2=thing2[1];
     r1=thing1[2];
     r2=thing2[2];
-    return(Math.abs(x1-x2)**2+Math.abs(y1-y2)**2 < (r1+r2)**2);
+    return(Math.abs(x1-x2)**2+Math.abs(y1-y2)**2);
 }
 
 
