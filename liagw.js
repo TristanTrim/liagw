@@ -47,13 +47,44 @@ function mouseMove(e){
 
 keycodes={
     "KeyS":function(){state="scaling"},
-    "KeyF":function(){state="grabbing"}
+    "KeyF":function(){state="grabbing"},
+    "KeyD":function(){state="looking";propSplode();},
+    "KeyW":function(){state="normal"}
+}
+var splode = {};
+function propSplode(){
+    //ob = getSingleSelection();
+    splode = {};
+    splode.x = 80;///REPLACE
+    splode.y = 80;///REPLACE
+    splode.rad = 40;
+    splode.list = list_of_fruit;
+    splode.offset = -Math.PI/3;
+    splode.readSpan = 2*Math.PI/3;
+    splode.scrollSpan = 2*Math.PI - splode.readSpan;
+    splode.nRead=10;
+    splode.readTic= splode.readSpan / splode.nRead;
+    splode.scrollTic= splode.scrollSpan / (splode.list.length - splode.nRead);
+    splode.draw = function(){
+        let pos = splode.offset;
+        let r = 3;
+        for (item in splode.list){
+            let x = Math.cos(pos)*splode.rad+splode.x;
+            let y = Math.sin(pos)*splode.rad+splode.y;
+            coords=[x,y,r];
+            drawCircle(coords);
+            pos += splode.scrollTic;
+        }
+    };
 }
 function keydown(e){
     keycodes[e.code]();
 }
 function keyup(e){
-    state="normal";
+    //ad hoc bullony out!!!
+    if(state!="looking"){
+        state="normal";
+    }
 }
 
 
@@ -98,8 +129,9 @@ canvas.height=window.innerHeight-fuck_you;
 
 // these should be objects with attributes.
 var things = [];
-things.push([canvas.width/2,canvas.height/2,13],false);//cursor
-things.push([canvas.width/3,canvas.height/3,4],false);//window
+things.push([canvas.width/2,canvas.height/2,13,false]);//cursor
+things.push([canvas.width/3,canvas.height/3,4,false,"window"]);//window
+things.push([2*canvas.width/3,canvas.height/3,4,false,"list_of_fruit"]);//window,
 
 if (canvas.getContext)
 {
@@ -109,9 +141,9 @@ function clear(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 function drawCircle(coords){
-    x=coords[0];
-    y=coords[1];
-    r=coords[2];
+    let x=coords[0];
+    let y=coords[1];
+    let r=coords[2];
     ctx.beginPath();
     ctx.arc(x, y, r, 0, 2 * Math.PI, false);
     ctx.lineWidth = 1;
@@ -130,10 +162,20 @@ function drawCircle(coords){
 
 // This should be based on activity, rather than constant, but... yeah.
 function tic(){
+    clear();
     if(state=="normal"){
         hlProximalThing();
     }
-    clear();
+    else if(state=="looking"){
+        splode.draw();
+        //console.log(splode);
+        //let x
+        //let y
+        //let r
+        //let s
+        //let n
+        //drawCircle([x,y,r,s,n]);
+    }
     for(i=0;i<things.length;i++){
         drawCircle(things[i]);
     }
