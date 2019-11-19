@@ -14,11 +14,11 @@ document.body.style.backgroundColor = "black";
 // Mouse motion
 
 var state = "normal";
-var vary = 0;
-var varx = 0;
+var lasty = 0;
+var lastx = 0;
 function mouseMove(e){
-    dx = (e.pageX-varx);
-    dy = (e.pageY-vary);
+    dx = (e.pageX-lastx);
+    dy = (e.pageY-lasty);
     if(state=="normal"){
         //things[0][0]+=dx;
         //things[0][1]+=dy;
@@ -41,17 +41,32 @@ function mouseMove(e){
     }else if(state=="looking"){
         things[0][0]=e.pageX;
         things[0][1]=e.pageY;
-        splode.offset += e.pageY*dx*0.001;
+        splode.offset += circleInput(splode.x,splode.y);
         if(splode.offset>splode.list.length){
             splode.offset-=splode.list.length;
         }else if(splode.offset<0){
             splode.offset+=splode.list.length;
         }
     }
-    varx = e.pageX;
-    vary = e.pageY;
+    lastx = e.pageX;
+    lasty = e.pageY;
 }
-
+var lastAng = 0;
+function circleInput(orx,ory){
+    let x=lastx-orx;
+    let y=lasty-ory;
+    //fuck circles
+   // let rad = Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
+   // let ang = Math.atan(y,x);
+   // let dAng = ang-lastAng;
+   // lastAng = ang;
+   // console.log(dAng);
+   // console.log(rad);
+    let dRot = (y>0?dx:-dx) + (x<0?dy:-dy);// screw fancy math
+    console.log(dRot);
+    //let taxiDist = Math.abs(x)+Math.abs(y);
+    return(0.1*dRot);//*taxiDist*0.0005);
+}
 // Keyboard stuff
 
 keycodes={
@@ -73,8 +88,6 @@ function propSplode(thing){
     }else{
         splode.list = Object.keys(thingob);
     }
-    console.log(thing);
-    console.log(splode.list);
     splode.offset = 0;
     splode.readStart = -Math.PI/3;
     splode.readEnd = Math.PI/3;
@@ -208,8 +221,14 @@ function tic(){
     clear();
     if(state=="normal"){
         hlProximalThing();
+        drawCircle(things[0]);
+    }
+    else if(state=="scaling"){
+        drawCircle([lastx,lasty,things[0][2]]);
     }
     else if(state=="looking"){
+        let cursorProxy = [things[0][0],things[0][1],3];
+        drawCircle(cursorProxy);
         splode.draw();
         //console.log(splode);
         //let x
@@ -219,7 +238,7 @@ function tic(){
         //let n
         //drawCircle([x,y,r,s,n]);
     }
-    for(i=0;i<things.length;i++){
+    for(i=1;i<things.length;i++){
         drawCircle(things[i]);
     }
     setTimeout(tic,39);
@@ -337,3 +356,10 @@ list_of_fruit = [
     "Tomato",
     "Zucchini"
 ]
+click_events = [
+    "It's ok. You don't need to click anymore. You're free!",
+    "Stop clicking!",
+    "You can remap clicking to something useful in the input stream.",
+    "Do you really want to be clicking? Really?"
+]
+
