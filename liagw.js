@@ -101,13 +101,20 @@ function propSplode(thing){
         let r = 3;
         //for (item in splode.list){
         for (let i = splode.offset; i<splode.list.length+splode.offset; i++){
-            item = splode.list[Math.floor(i%splode.list.length)];
+            index = Math.floor(i%splode.list.length);
+            item = splode.list[index];
             let x = Math.cos(pos)*splode.rad+splode.x;
             let y = Math.sin(pos)*splode.rad+splode.y;
+            if(index==0){
+                ctx.beginPath();
+                ctx.moveTo(splode.x,splode.y);
+                ctx.lineTo(x,y);
+                ctx.stroke();
+            }
             if(pos>splode.readStart && pos<splode.readEnd){//in the read zone
                 pos += splode.readTic;
                 // print textual information
-                ctx.strokeText(item.toString(),x,y);
+                ctx.strokeText(item.toString(),x+7,y+3);
                 r = 3;
             }else{
                 pos += splode.scrollTic;
