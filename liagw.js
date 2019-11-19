@@ -14,6 +14,7 @@ document.body.style.backgroundColor = "black";
 // Mouse motion
 
 var state = "normal";
+var selectionState = "normal";// normal, closest
 var lasty = 0;
 var lastx = 0;
 function mouseMove(e){
@@ -26,8 +27,10 @@ function mouseMove(e){
         things[0][1]=e.pageY;
     }else if(state=="scaling"){
         things[0][2]-=dy;
+            selectionState="normal";
         if(things[0][2]<1){
             things[0][2]=1;
+            selectionState="closest";
         }
     }else if(state=="grabbing"){
         things[0][0]+=dx;
@@ -150,7 +153,25 @@ function getClosestThing(){
             closest = i;
             closestDist = dist;
         }
-        return(things[closest]);
+    }
+    return(things[closest]);
+}
+function hlClosestThing(){
+    let closest = 1;
+    let closestDist = getDist(things[0],things[1]);
+    for (i=2;i<things.length;i++){
+        let dist = getDist(things[0],things[i]);
+        things[i][3]=false;
+        if(dist < closestDist){
+            closest = i;
+            closestDist = dist;
+            things[i][3]=true;
+        }
+    }
+    if(closest!=1){
+        things[1][3]=false;
+    }else{
+        things[1][3]=true;
     }
 }
 function hlProximalThing(){
@@ -227,7 +248,11 @@ function drawCircle(coords){
 function tic(){
     clear();
     if(state=="normal"){
-        hlProximalThing();
+        if(selectionState=="normal"){
+            hlProximalThing();
+        }else if(selectionState=="closest"){
+            hlClosestThing();
+        }
         drawCircle(things[0]);
     }
     else if(state=="scaling"){
