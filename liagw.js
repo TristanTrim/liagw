@@ -67,7 +67,12 @@ function propSplode(thing){
     splode.x = thing[0];
     splode.y = thing[1];
     splode.rad = 60;
-    splode.list = window[thing[4]];
+    thingob = window[thing[4]];
+    if(thingob instanceof Array){
+        splode.list = thingob;
+    }else{
+        splode.list = Object.keys(thingob);
+    }
     console.log(thing);
     console.log(splode.list);
     splode.offset = 0;
