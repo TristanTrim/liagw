@@ -38,6 +38,15 @@ function mouseMove(e){
                 things[i][1]+=dy;
             }
         }
+    }else if(state=="looking"){
+        things[0][0]=e.pageX;
+        things[0][1]=e.pageY;
+        splode.offset += e.pageY*dx*0.001;
+        if(splode.offset>splode.list.length){
+            splode.offset-=splode.list.length;
+        }else if(splode.offset<0){
+            splode.offset+=splode.list.length;
+        }
     }
     varx = e.pageX;
     vary = e.pageY;
@@ -57,30 +66,37 @@ function propSplode(thing){
     splode = {};
     splode.x = thing[0];
     splode.y = thing[1];
-    splode.rad = 40;
+    splode.rad = 60;
     splode.list = window[thing[4]];
     console.log(thing);
     console.log(splode.list);
-    splode.offset = -Math.PI/3;
-    splode.readSpan = 2*Math.PI/3;
+    splode.offset = 0;
+    splode.readStart = -Math.PI/3;
+    splode.readEnd = Math.PI/3;
+    splode.readSpan = splode.readEnd - splode.readStart;
     splode.scrollSpan = 2*Math.PI - splode.readSpan;
     splode.nRead=8;
     splode.readTic= splode.readSpan / splode.nRead;
     splode.scrollTic= splode.scrollSpan / (splode.list.length - splode.nRead);
     splode.draw = function(){
-        let pos = splode.offset;
+        let pos = splode.readStart;//splode.offset;
         let r = 3;
-        for (item in splode.list){
+        //for (item in splode.list){
+        for (let i = splode.offset; i<splode.list.length+splode.offset; i++){
+            item = splode.list[Math.floor(i%splode.list.length)];
             let x = Math.cos(pos)*splode.rad+splode.x;
             let y = Math.sin(pos)*splode.rad+splode.y;
-            coords=[x,y,r];
-            drawCircle(coords);
-            if(pos>splode.offset && pos<-splode.offset){//in the read zone
+            if(pos>splode.readStart && pos<splode.readEnd){//in the read zone
                 pos += splode.readTic;
                 // print textual information
+                ctx.strokeText(item.toString(),x,y);
+                r = 3;
             }else{
                 pos += splode.scrollTic;
+                r = 0.4;
             }
+            coords=[x,y,r];
+            drawCircle(coords);
             if(pos>Math.PI){
                 pos-=2*Math.PI;
             }
