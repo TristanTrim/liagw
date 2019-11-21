@@ -26,8 +26,10 @@ function mouseMove(e){
         drawstacks.cursor.cursor[0]=e.pageX;
         drawstacks.cursor.cursor[1]=e.pageY;
     }else if(state=="scaling"){
+        drawstacks.cursor.cursor[0]=e.pageX;
+        drawstacks.cursor.cursor[1]=e.pageY;
         drawstacks.cursor.cursor[2]-=dy;
-            selectionState="normal";
+        selectionState="normal";
         if(drawstacks.cursor.cursor[2]<1){
             drawstacks.cursor.cursor[2]=1;
             selectionState="closest";
@@ -274,7 +276,8 @@ function tic(){
         drawCircle(drawstacks.cursor.cursor);
     }
     else if(state=="scaling"){
-        drawCircle([lastx,lasty,drawstacks.cursor.cursor[2]]);
+        drawCircle(drawstacks.cursor.cursor);
+        //drawCircle([lastx,lasty,drawstacks.cursor.cursor[2]]);
     }
     else if(state=="looking"){
         let cx = drawstacks.cursor.cursor[0];
