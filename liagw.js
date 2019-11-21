@@ -171,11 +171,13 @@ function getClosestThing(){
 }
 function hlClosestThing(){
     let first = true;
+    let closestDist;
+    let closest;
     for (key in drawstacks.normal){
         drawstacks.normal[key][3]=false;//not drawing
         if (first){
-            let closest = key;
-            let closestDist = getDist(
+            closest = key;
+            closestDist = getDist(
                 drawstacks.cursor.cursor,drawstacks.normal[key]
             );
             first = false;
