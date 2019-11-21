@@ -21,29 +21,29 @@ function mouseMove(e){
     dx = (e.pageX-lastx);
     dy = (e.pageY-lasty);
     if(state=="normal"){
-        //things[0][0]+=dx;
-        //things[0][1]+=dy;
-        things[0][0]=e.pageX;
-        things[0][1]=e.pageY;
+        //drawstacks.cursor.cursor[0]+=dx;
+        //drawstacks.cursor.cursor[1]+=dy;
+        drawstacks.cursor.cursor[0]=e.pageX;
+        drawstacks.cursor.cursor[1]=e.pageY;
     }else if(state=="scaling"){
-        things[0][2]-=dy;
+        drawstacks.cursor.cursor[2]-=dy;
             selectionState="normal";
-        if(things[0][2]<1){
-            things[0][2]=1;
+        if(drawstacks.cursor.cursor[2]<1){
+            drawstacks.cursor.cursor[2]=1;
             selectionState="closest";
         }
     }else if(state=="grabbing"){
-        things[0][0]+=dx;
-        things[0][1]+=dy;
-        for (i=1;i<things.length;i++){
-            if(things[i][3]){
-                things[i][0]+=dx;
-                things[i][1]+=dy;
+        drawstacks.cursor.cursor[0]+=dx;
+        drawstacks.cursor.cursor[1]+=dy;
+        for(key in drawstacks.normal){
+            if(drawstacks.normal[key][3]){
+                drawstacks.normal[key][0]+=dx;
+                drawstacks.normal[key][1]+=dy;
             }
         }
     }else if(state=="looking"){
-        things[0][0]=e.pageX;
-        things[0][1]=e.pageY;
+        drawstacks.cursor.cursor[0]=e.pageX;
+        drawstacks.cursor.cursor[1]=e.pageY;
         splode.offset += circleInput(splode.x,splode.y);
         if(splode.offset>splode.list.length){
             splode.offset-=splode.list.length;
@@ -55,37 +55,37 @@ function mouseMove(e){
     lasty = e.pageY;
 }
 var lastAng = 0;
+var wheelInputSpeed = 0.05;
 function circleInput(orx,ory){
     let x=lastx-orx;
     let y=lasty-ory;
     //fuck circles
-   // let rad = Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
-   // let ang = Math.atan(y,x);
-   // let dAng = ang-lastAng;
-   // lastAng = ang;
-   // console.log(dAng);
-   // console.log(rad);
     let dRot = (y>0?dx:-dx) + (x<0?dy:-dy);// screw fancy math
-    console.log(dRot);
-    //let taxiDist = Math.abs(x)+Math.abs(y);
-    return(0.1*dRot);//*taxiDist*0.0005);
+    return(wheelInputSpeed*dRot);
 }
 // Keyboard stuff
 
 keycodes={
     "KeyS":function(){state="scaling"},
     "KeyF":function(){state="grabbing"},
-    "KeyD":function(){state="looking";propSplode(getClosestThing());},
+    "KeyD":function(){
+        if(state=="looking"){
+            wheelInputSpeed=0.5;
+        }else{
+            state="looking";
+            propSplode(getClosestThing());
+        }
+    },
     "KeyW":function(){state="normal"}
 }
 var splode = {};
 function propSplode(thing){
     //ob = getSingleSelection();
     splode = {};
-    splode.x = thing[0];
-    splode.y = thing[1];
+    splode.x = drawstacks.normal[thing][0];
+    splode.y = drawstacks.normal[thing][1];
     splode.rad = 60;
-    thingob = window[thing[4]];
+    thingob = window[thing];
     if(thingob instanceof Array){
         splode.list = thingob;
     }else{
@@ -139,48 +139,64 @@ function keyup(e){
     if(state!="looking"){
         state="normal";
     }
+    wheelInputSpeed=0.05;
 }
 
 
 // cursor behavior
 
 function getClosestThing(){
-    let closest = 1;
-    let closestDist = getDist(things[0],things[1]);
-    for (i=2;i<things.length;i++){
-        let dist = getDist(things[0],things[i]);
+    let first = true;
+    let closest;
+    let closestDist;
+    for (key in drawstacks.normal){
+        if (first){
+            closest = key;
+            closestDist = getDist(
+                drawstacks.cursor.cursor,drawstacks.normal[key]
+            );
+            first = false;
+        }
+        let dist = getDist(
+            drawstacks.cursor.cursor,drawstacks.normal[key]
+        );
         if(dist < closestDist){
-            closest = i;
+            closest = key;
             closestDist = dist;
         }
     }
-    return(things[closest]);
+    console.log(closest);
+    console.log(closestDist);
+    return(closest);
 }
 function hlClosestThing(){
-    let closest = 1;
-    let closestDist = getDist(things[0],things[1]);
-    for (i=2;i<things.length;i++){
-        let dist = getDist(things[0],things[i]);
-        things[i][3]=false;
+    let first = true;
+    for (key in drawstacks.normal){
+        drawstacks.normal[key][3]=false;//not drawing
+        if (first){
+            let closest = key;
+            let closestDist = getDist(
+                drawstacks.cursor.cursor,drawstacks.normal[key]
+            );
+            first = false;
+        }
+        let dist = getDist(
+            drawstacks.cursor.cursor,drawstacks.normal[key]
+        );
         if(dist < closestDist){
-            closest = i;
+            closest = key;
             closestDist = dist;
-            things[i][3]=true;
         }
     }
-    if(closest!=1){
-        things[1][3]=false;
-    }else{
-        things[1][3]=true;
-    }
+    drawstacks.normal[closest][3]=true;
 }
 function hlProximalThing(){
-    for (i=1;i<things.length;i++){
-            if(close(things[0],things[i])){
-                things[i][3]=true;
-            }else{
-                things[i][3]=false;
-            }
+    for (key in drawstacks.normal){
+        if(close(drawstacks.cursor.cursor,drawstacks.normal[key])){
+            drawstacks.normal[key][3]=true;
+        }else{
+            drawstacks.normal[key][3]=false;
+        }
     }
 }
 
@@ -210,12 +226,12 @@ canvas.height=window.innerHeight-fuck_you;
 
 
 // things
-
-// these should be objects with attributes.
-var things = [];
-things.push([canvas.width/2,canvas.height/2,13,false]);//cursor
-things.push([canvas.width/3,canvas.height/3,4,false,"window"]);//window
-things.push([2*canvas.width/3,canvas.height/3,4,false,"list_of_fruit"]);//window,
+drawstacks = {
+    "cursor":{"cursor":[canvas.width/2,canvas.height/2,13,false]},
+    "normal":{"window":[canvas.width/3,canvas.height/3,4,false],
+        "list_of_fruit":[2*canvas.width/3,canvas.height/3,4,false]
+    }
+}
 
 if (canvas.getContext)
 {
@@ -253,14 +269,20 @@ function tic(){
         }else if(selectionState=="closest"){
             hlClosestThing();
         }
-        drawCircle(things[0]);
+        drawCircle(drawstacks.cursor.cursor);
     }
     else if(state=="scaling"){
-        drawCircle([lastx,lasty,things[0][2]]);
+        drawCircle([lastx,lasty,drawstacks.cursor.cursor[2]]);
     }
     else if(state=="looking"){
-        let cursorProxy = [things[0][0],things[0][1],3];
-        drawCircle(cursorProxy);
+        let cx = drawstacks.cursor.cursor[0];
+        let cy = drawstacks.cursor.cursor[1];
+        ctx.beginPath();
+        ctx.moveTo(cx+3,cy+3);
+        ctx.lineTo(cx-3,cy-3);
+        ctx.moveTo(cx-3,cy+3);
+        ctx.lineTo(cx+3,cy-3);
+        ctx.stroke();
         splode.draw();
         //console.log(splode);
         //let x
@@ -270,8 +292,8 @@ function tic(){
         //let n
         //drawCircle([x,y,r,s,n]);
     }
-    for(i=1;i<things.length;i++){
-        drawCircle(things[i]);
+    for(key in drawstacks.normal){
+        drawCircle(drawstacks.normal[key]);
     }
     setTimeout(tic,39);
 }
@@ -392,6 +414,7 @@ click_events = [
     "It's ok. You don't need to click anymore. You're free!",
     "Stop clicking!",
     "You can remap clicking to something useful in the input stream.",
-    "Do you really want to be clicking? Really?"
+    "Do you really want to be clicking? Really?",
+    "The graphics are running on the CPU. Go shame the author!"
 ]
 
