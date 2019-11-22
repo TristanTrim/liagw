@@ -67,19 +67,66 @@ function circleInput(orx,ory){
 }
 // Keyboard stuff
 
-keycodes={
+normalKeycodes={
     "KeyS":function(){state="scaling"},
     "KeyF":function(){state="grabbing"},
     "KeyD":function(){
-        if(state=="looking"){
-            wheelInputSpeed=0.5;
-        }else{
-            state="looking";
-            propSplode(getClosestThing());
-        }
+        state="looking";
+        keycodes=wheelKeycodes;
+        propSplode(getClosestThing());
+       // if(state=="looking"){
+       //     wheelInputSpeed=0.5;
+       // }else{
+       //     state="looking";
+       //     propSplode(getClosestThing());
+       // }
     },
-    "KeyW":function(){state="normal"}
+    "KeyW":function(){state="normal"},
+    "KeyG":()=>{call(getClosestThing())}
 }
+
+wheelKeycodes={
+    //exit out
+    "KeyW":()=>{state="normal";keycodes=normalKeycodes;},
+    //resize wheel
+    "KeyS":()=>{splode.rad += -5*circleInput(splode.x,splode.y);},
+    //speed up scroll
+    "KeyD":()=>{wheelInputSpeed=0.5;},
+    //move circle
+    "KeyF":()=>{splode.x+=dx;splode.y+=dy;},// buggy as heck. Make a target abstraction so you can do the mousemove function nice!
+    //call
+    "KeyG":()=>{call(splode.highlighted)},
+    //breakout
+    //if no selection, current highlight, otherwise selected only
+    "KeyC":()=>{mkThing(splode.highlighted);},
+    //select
+    "KeyV":()=>{}
+}
+
+keycodes=normalKeycodes;
+function keydown(e){
+    keycodes[e.code]();
+}
+function keyup(e){
+    //ad hoc bullony out!!!
+    if(state!="looking"){
+        state="normal";
+    }
+    wheelInputSpeed=0.05;
+}
+
+
+
+// make it work on not window!!! REEE
+function mkThing(thingable){
+    drawstacks.normal[thingable]=[lastx,lasty,3,false];
+}
+function call(callable){
+    window[callable]();
+}
+
+//wheel functionality
+
 var splode = {};
 function propSplode(thing){
     //ob = getSingleSelection();
@@ -105,9 +152,17 @@ function propSplode(thing){
         let pos = splode.readStart;//splode.offset;
         let r = 3;
         //for (item in splode.list){
+        let j = 0;
         for (let i = splode.offset; i<splode.list.length+splode.offset; i++){
             index = Math.floor(i%splode.list.length);
             item = splode.list[index];
+            j++;
+            highlight=false;
+            if(j==6){
+               //set item to be highlighted
+               highlight = true;
+               splode.highlighted = item;
+            }
             let x = Math.cos(pos)*splode.rad+splode.x;
             let y = Math.sin(pos)*splode.rad+splode.y;
             if(index==0){
@@ -120,12 +175,12 @@ function propSplode(thing){
                 pos += splode.readTic;
                 // print textual information
                 ctx.strokeText(item.toString(),x+7,y+3);
-                r = 3;
+                r = 2;
             }else{
                 pos += splode.scrollTic;
                 r = 0.4;
             }
-            coords=[x,y,r];
+            coords=[x,y,r,highlight];
             drawCircle(coords);
             if(pos>Math.PI){
                 pos-=2*Math.PI;
@@ -133,16 +188,7 @@ function propSplode(thing){
         }
     };
 }
-function keydown(e){
-    keycodes[e.code]();
-}
-function keyup(e){
-    //ad hoc bullony out!!!
-    if(state!="looking"){
-        state="normal";
-    }
-    wheelInputSpeed=0.05;
-}
+
 
 
 // cursor behavior
@@ -252,13 +298,15 @@ function drawCircle(coords){
     ctx.arc(x, y, r, 0, 2 * Math.PI, false);
     ctx.lineWidth = 1;
     if(coords[3]){
-        ctx.lineWidth = 3;
+        //highlighted
+        ctx.lineWidth = 4;
         ctx.strokeStyle = '#0077aa';
         ctx.stroke();
         ctx.lineWidth = 1;
         ctx.strokeStyle = '#00FF00';
         ctx.stroke();
     }else{
+        //non highlighted
         ctx.strokeStyle = '#00FF00';
         ctx.stroke();
     }
